@@ -4,6 +4,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
   node {
+stages {
   stage('SCM') {
     checkout scm
   }
@@ -15,3 +16,4 @@ pipeline {
   }
 }
     }
+}
