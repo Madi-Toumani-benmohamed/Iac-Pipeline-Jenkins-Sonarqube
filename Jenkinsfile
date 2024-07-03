@@ -26,12 +26,12 @@ pipeline {
             steps {
                 script {
                     // Utilisation d'un outil configuré dans Jenkins
-                    def scannerHome = tool 'SonarScanner'
+                 //   def scannerHome = tool 'SonarScanner'
                     
                     // Exécution du scanner
                     withSonarQubeEnv('SQserver') {
                         sh """
-                            ${scannerHome}/bin/sonar-scanner \
+                            './sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner' \
                             -Dsonar.projectKey=sonar-jenkins \
                             -Dsonar.sources=src \
                             -Dsonar.host.url=${SONAR_HOST_URL} \
