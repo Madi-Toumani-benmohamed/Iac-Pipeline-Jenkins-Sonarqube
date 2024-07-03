@@ -31,7 +31,8 @@ pipeline {
                     // Exécution du scanner
                     withSonarQubeEnv('SQserver') {
                         sh """
-                            './sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner' \
+                            pwd \
+                            ./sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner \
                             -Dsonar.projectKey=sonar-jenkins \
                             -Dsonar.sources=src \
                             -Dsonar.host.url=${SONAR_HOST_URL} \
