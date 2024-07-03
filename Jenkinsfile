@@ -33,7 +33,7 @@ pipeline {
                        sh """
                             ./sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner \
                             -Dsonar.projectKey=sonar-jenkins \
-                            -Dsonar.sources=src \
+                            -Dsonar.sources=src/php/ \
                             -Dsonar.host.url=${SONAR_HOST_URL} \
                             -Dsonar.login=${SONAR_AUTH_TOKEN}
                         """
