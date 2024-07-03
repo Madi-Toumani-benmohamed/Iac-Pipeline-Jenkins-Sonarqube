@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+
     environment {
         // Nom du serveur SonarQube configuré dans Jenkins
         SONARQUBE_SERVER = 'SQserver'
@@ -11,34 +15,36 @@ pipeline {
     }
 
     stages {
-        stage('SonarQube analysis') {
-            environment {
-                // Utilisez le nom exact de votre installation SonarQube Scanner
-                SCANNER_HOME = tool name: 'SonarQubeScanner', type: 'SonarQubeScanner'
+        stage('SCM') {
+            steps {
+                // Vérifie le code source de votre dépôt SCM (par exemple, Git)
+                checkout scm
             }
+        }
+
+        stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Affichez les chemins pour le débogage
-                    echo "SonarQube Scanner Home: ${SCANNER_HOME}"
-                    echo "SonarQube Server: ${SONARQUBE_SERVER}"
-                }
-
-                // Analyse SonarQube
-                withSonarQubeEnv(SONARQUBE_SERVER) {
-                    sh """
-                        ${SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=sonar-jenkins \
-                        -Dsonar.sources=src \
-                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                        -Dsonar.login=${SONAR_AUTH_TOKEN}
-                    """
+                    // Utilisation d'un outil configuré dans Jenkins
+                    def scannerHome = tool 'SonarScanner'
+                    
+                    // Exécution du scanner
+                    withSonarQubeEnv('SQserver') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=sonar-jenkins \
+                            -Dsonar.sources=src \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.login=${SONAR_AUTH_TOKEN}
+                        """
+                    }
                 }
             }
         }
 
         stage('Quality Gate') {
             steps {
-                // Attendre que l'analyse soit complétée et obtenir les résultats du Quality Gate.
+                // Attendre que l'analyse soit complétée et obtenir les résultats du Quality Gate
                 timeout(time: 1, unit: 'HOURS') {
                     waitForQualityGate abortPipeline: true
                 }
