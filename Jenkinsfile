@@ -1,4 +1,5 @@
-node {
+pipeline{
+ stages{ 
   stage('SCM') {
     checkout scm
   }
@@ -8,4 +9,5 @@ node {
       sh "./sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner"
     }
   }
+}
 }
