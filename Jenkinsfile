@@ -2,32 +2,43 @@ pipeline {
     agent any
 
     environment {
-        // Assurez-vous de remplacer 'SonarQubeServer' par le nom de votre serveur SonarQube configuré dans Jenkins.
+        // Remplacez 'SonarQubeServer' par le nom de votre serveur SonarQube configuré dans Jenkins.
         SONARQUBE_SERVER = 'SQserver'
+        // Ajoutez ici l'URL de votre serveur SonarQube et le token d'authentification.
+        SONAR_HOST_URL = 'http://your-sonarqube-server-url'
+        SONAR_AUTH_TOKEN = 'your-sonarqube-auth-token'
     }
 
     stages {
-        stage('Checkout') {
+        stage('SonarQube analysis') {
+            environment {
+                // Assurez-vous que votre SonarQube Scanner est configuré.
+                SCANNER_HOME = tool name: 'SonarQube Scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+            }
             steps {
-                // Vérifie le code source de votre dépôt SCM (par exemple, Git).
-                checkout scm
+                // Analyse SonarQube
+                withSonarQubeEnv(SONARQUBE_SERVER) {
+                    sh "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=YourProjectKey -Dsonar.sources=src -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_AUTH_TOKEN}"
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                // Attendre que l'analyse soit complétée et obtenir les résultats du Quality Gate.
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
     }
 
-        stage('Build') {
-            steps {
-                // Compilation du projet avec Maven.
-                sh 'mvn clean package'
-            }
-        }
-       
     post {
         success {
-            echo 'Build and SonarQube analysis successful.'
+            echo 'SonarQube analysis successful.'
         }
         failure {
-            echo 'Build or SonarQube analysis failed.'
+            echo 'SonarQube analysis failed.'
         }
     }
 }
